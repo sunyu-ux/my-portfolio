@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Portfolio — 作品集</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  body { font-family: 'Inter', system-ui, sans-serif; background: #0b0f19; margin: 0; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #0b0f19; }
+  ::-webkit-scrollbar-thumb { background: #1a2a3a; border-radius: 3px; }
+  @keyframes scanLine { 0%{top:-2px} 100%{top:100vh} }
+  .scan-line { animation: scanLine 8s linear infinite; }
+  a { text-decoration: none; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>window.__PORTFOLIO_DATA__ = JSON.parse("{\"content\":{\"project.casual-game-level.coverMode\":\"gradient\",\"project.cyberpunk-city.coverMode\":\"gradient\",\"about.targetCity\":\"求职 地· 不限\",\"project.ancient-chinese.tag.0\":\"UE5\",\"project.ancient-chinese.tag.3\":\"Niagara粒子特效\",\"project.ancient-chinese.tag.1\":\"PCG\",\"project.cyberpunk-city.tag.1\":\"灯光材质编写\",\"project.medieval-fantasy.tag.1\":\"EmberGen\",\"project.medieval-fantasy.tag.2\":\"Niagara粒子特效\",\"project.casual-game-level.tag.0\":\"UE5\",\"project.casual-game-level.tag.1\":\"Gaea地形\",\"project.ancient-chinese.description\":\"使用 UE5 地形编辑模块与植被系统构建的古风意境场景。技术上运用地形、植被分布、PCG与大气光照系统，搭配中式建筑、山水地形和粒子特效，实现高品质自然场景表现。\",\"project.cyberpunk-city.description\":\"基于 UE5 搭建的赛博朋克风格城市场景，通过对材质的编写实现了贴花渐变与位移的效果，成功模拟了霓虹灯光，搭配上雾气和灯光特效，构建出夜之城的一角。\",\"project.medieval-fantasy.description\":\"使用 UE5的海洋插件成功模拟了海洋的物理系统，在通过在EmberGen软件搭建火炮和着火特效并结合UE5自带的Niagara特效系统搭建了火炮开火和起火的特效，实现了一个海盗船相遇开火交战的镜头。\",\"project.casual-game-level.description\":\"利用Gera软件实时生成地形图，结合UE5一起搭建了火山喷发的一个场景。\"},\"customProjects\":[],\"projectOrder\":[\"ancient-chinese\",\"cyberpunk-city\",\"medieval-fantasy\",\"casual-game-level\"],\"mediaIds\":[\"cyberpunk-city\",\"medieval-fantasy\",\"ancient-chinese\",\"casual-game-level\"],\"previewIds\":[\"cyberpunk-city\",\"medieval-fantasy\",\"ancient-chinese\",\"casual-game-level\"]}");</script>
+<script type="text/babel">
+const CYAN = '#00d4ff';
+const CYAN_DIM = '#00d4ff66';
+const DARK_BG = '#0b0f19';
+const PANEL_BG = '#0f1523';
+const PANEL_BORDER = '#1a2a3a';
+const GOLD = '#f5c842';
+
+/* ═══ Data Types ═══ */
+const DEFAULT_PROJECTS = [
+  {id:'cyberpunk-city',title:'赛博朋克风格城市场景',description:'基于 UE5 搭建的赛博朋克风格城市场景，运用 Niagara 粒子系统实现霓虹灯光与雨雾特效，结合 PCG 模块程序化生成建筑群与街道布局',tags:['UE5','Niagara','PCG','场景搭建'],year:'2025',detail:'本项目基于 Unreal Engine 5 搭建了一个完整的赛博朋克风格城市场景。运用 Niagara 粒子系统实现了霓虹灯光闪烁、雨雾弥漫等动态特效，营造出极具未来感的城市氛围。结合 PCG 模块实现了建筑群的程序化生成与街道布局，大幅提升了场景制作效率。'},
+  {id:'medieval-fantasy',title:'中世纪奇幻场景',description:'使用 UE5 地形编辑模块与植被系统构建中世纪奇幻世界，包含风格化地形、植被分布与大气光照系统',tags:['UE5','地形编辑','植被系统','材质编写'],year:'2024',detail:'使用 UE5 地形编辑模块构建了一个广阔的中世纪奇幻世界。通过自定义材质实现了风格化的地形渲染，配合植被系统完成自然生态的分布。'},
+  {id:'ancient-chinese',title:'古风意境场景',description:'运用 Unity 引擎打造的古风意境场景，包含中式建筑、山水地形与粒子特效',tags:['Unity','C#','场景美术','粒子特效'],year:'2024',detail:'运用 Unity 引擎打造了一个充满东方韵味的古风意境场景。场景以中式古典建筑为核心，配合山水地形与飘渺云雾，营造出诗画般的视觉效果。'},
+  {id:'casual-game-level',title:'休闲风格游戏关卡',description:'基于 Unity 开发的休闲风格游戏关卡，使用 C# 编写核心逻辑与交互系统',tags:['Unity','C#','Maya','关卡设计'],year:'2023',detail:'基于 Unity 开发的休闲风格游戏关卡项目。使用 C# 编写了完整的游戏核心逻辑，包括角色控制、物品收集、关卡进度等系统。'},
+];
+
+/* ═══ Data Access ═══ */
+function getEmbeddedData() {
+  const raw = window.__PORTFOLIO_DATA__;
+  if (!raw) return null;
+  return {
+    content: raw.content || {},
+    customProjects: raw.customProjects || [],
+    projectOrder: raw.projectOrder || [],
+    mediaIds: raw.mediaIds || [],
+    previewIds: raw.previewIds || [],
+  };
+}
+
+/* ═══ Async data loader (loads from assets/ files) ═══ */
+async function loadPortfolioData() {
+  const embedded = getEmbeddedData();
+  if (!embedded) return { content:{}, customProjects:[], projectOrder:{}, mediaData:{}, previewData:{} };
+
+  const mediaData = {};
+  const previewData = {};
+
+  // Load media files in parallel
+  const mediaPromises = (embedded.mediaIds || []).map(async (pid) => {
+    try {
+      const res = await fetch('assets/media-' + pid + '.json');
+      if (res.ok) {
+        const text = await res.text();
+        mediaData['project-edit-' + pid] = text;
+      }
+    } catch (e) { console.warn('[portfolio] Failed to load media for', pid, e); }
+  });
+
+  const previewPromises = (embedded.previewIds || []).map(async (pid) => {
+    try {
+      const res = await fetch('assets/preview-' + pid + '.txt');
+      if (res.ok) {
+        previewData[pid] = await res.text();
+      }
+    } catch (e) { console.warn('[portfolio] Failed to load preview for', pid, e); }
+  });
+
+  await Promise.all([...mediaPromises, ...previewPromises]);
+
+  return {
+    content: embedded.content,
+    customProjects: embedded.customProjects,
+    projectOrder: embedded.projectOrder,
+    mediaData,
+    previewData,
+  };
+}
+
+/* ═══ Hash Router ═══ */
+function useHashRouter() {
+  const [route, setRoute] = React.useState(() => {
+    const h = window.location.hash.slice(1) || '/';
+    return h;
+  });
+  React.useEffect(() => {
+    const handler = () => setRoute(window.location.hash.slice(1) || '/');
+    window.addEventListener('hashchange', handler);
+    return () => window.removeEventListener('hashchange', handler);
+  }, []);
+  const navigate = (path) => { window.location.hash = path; };
+  return { route, navigate };
+}
+
+/* ═══ Icons (inline SVG) ═══ */
+function IconTerminal() { return <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>; }
+function IconUser() { return <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>; }
+function IconFolder() { return <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>; }
+function IconMail() { return <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>; }
+function IconPhone() { return <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>; }
+function IconMapPin() { return <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>; }
+function IconGraduation() { return <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>; }
+function IconCalendar() { return <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>; }
+function IconArrowUpRight() { return <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>; }
+function IconFlame() { return <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>; }
+function IconExternalLink() { return <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>; }
+function IconArrowLeft() { return <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>; }
+function IconX() { return <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>; }
+function IconChevronDown() { return <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>; }
+
+/* ═══ IntersectionObserver hook ═══ */
+function useInView(threshold = 0.15) {
+  const ref = React.useRef(null);
+  const [visible, setVisible] = React.useState(false);
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.unobserve(el); } }, { threshold });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, visible };
+}
+
+/* ═══ Section wrapper ═══ */
+function Section({ id, children }) {
+  const { ref, visible } = useInView();
+  return (
+    <section id={id} ref={ref}
+      className={"relative transition-all duration-700 " + (visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8")}
+    >{children}</section>
+  );
+}
+
+function SectionTitle({ index, children }) {
+  return (
+    <div className="mb-10 flex items-center gap-4">
+      <span className="font-mono text-sm tracking-widest" style={{color:CYAN}}>{'// '+index}</span>
+      <div className="h-px flex-1" style={{background:'linear-gradient(90deg,'+CYAN_DIM+',transparent)'}}/>
+      <h2 className="text-2xl font-bold tracking-tight text-gray-100">{children}</h2>
+      <div className="h-px w-8" style={{background:CYAN}}/>
+    </div>
+  );
+}
+
+/* ═══ Skill bar ═══ */
+function SkillBar({ skill, visible }) {
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="text-sm font-medium text-gray-300">{skill.name}</span>
+        <span className="font-mono text-xs" style={{color:CYAN}}>{skill.level}%</span>
+      </div>
+      <div className="h-[3px] overflow-hidden rounded-sm" style={{background:PANEL_BORDER}}>
+        <div className="h-full rounded-sm transition-all duration-1000 ease-out"
+          style={{width:visible?skill.level+'%':'0%',background:'linear-gradient(90deg,'+CYAN+','+CYAN_DIM+')',boxShadow:visible?'0 0 8px '+CYAN+'44':'none'}}/>
+      </div>
+    </div>
+  );
+}
+
+/* ═══ Project Card ═══ */
+function ProjectCard({ project, index, previewSrc, coverMode, navigate }) {
+  const { ref, visible } = useInView(0.1);
+  return (
+    <div ref={ref} className="group relative cursor-pointer overflow-hidden transition-all duration-500"
+      style={{background:PANEL_BG,border:'1px solid '+PANEL_BORDER,opacity:visible?1:0,transform:visible?'translateY(0)':'translateY(20px)',transition:'opacity 0.6s,transform 0.6s'}}
+      onClick={() => navigate('/project/'+project.id)}>
+      <div className="h-[2px] w-0 transition-all duration-500 group-hover:w-full" style={{background:CYAN}}/>
+      {previewSrc ? (
+        <div className="relative overflow-hidden" style={{height: coverMode === 'full' ? '220px' : '144px'}}>
+          <img src={previewSrc} alt={project.title} className="h-full w-full object-cover"/>
+          {coverMode !== 'full' && (
+            <div className="absolute inset-0" style={{background:'linear-gradient(transparent 50%,'+PANEL_BG+')'}}/>
+          )}
+        </div>
+      ) : (
+        <div className="flex h-20 items-center justify-center" style={{background:DARK_BG,borderBottom:'1px solid '+PANEL_BORDER}}>
+          <span className="font-mono text-lg font-bold" style={{color:CYAN}}>{project.title.charAt(0)}</span>
+        </div>
+      )}
+      <div className="p-6">
+        <div className="mb-3 flex items-start justify-between">
+          <div>
+            <div className="mb-1 flex items-center gap-2">
+              <span className="inline-block h-2 w-2" style={{background:CYAN}}/>
+              <h3 className="text-lg font-bold text-gray-100">{project.title}</h3>
+            </div>
+            <span className="font-mono text-xs tracking-wider" style={{color:CYAN}}>{project.year}</span>
+          </div>
+          <IconArrowUpRight/>
+        </div>
+        <p className="mb-4 text-sm leading-relaxed text-gray-400">{project.description}</p>
+        <div className="flex flex-wrap gap-2">
+          {project.tags.map((tag,i)=>(
+            <span key={i} className="px-2 py-0.5 font-mono text-xs" style={{border:'1px solid '+PANEL_BORDER,color:'#8899aa'}}>{tag}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══ Home Page ═══ */
+function HomePage({ data, navigate }) {
+  const [activeSection, setActiveSection] = React.useState('about');
+  const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
+  const content = data?.content || {};
+
+  const c = (key, def) => content[key] || def;
+
+  const allProjects = [...DEFAULT_PROJECTS, ...(data?.customProjects || [])];
+  let orderedIds = allProjects.map(p => p.id);
+  if (data?.projectOrder?.length) orderedIds = data.projectOrder;
+  const projectMap = new Map(allProjects.map(p=>[p.id,p]));
+  const visibleProjects = [];
+  const seen = new Set();
+  for (const id of orderedIds) { const p = projectMap.get(id); if(p){visibleProjects.push(p);seen.add(id);} }
+  for (const p of allProjects) { if(!seen.has(p.id)) visibleProjects.push(p); }
+
+  const skills = [
+    {name:c('skill.UE5 / Unity.name','UE5 / Unity'),level:92},
+    {name:c('skill.C / C# / C++.name','C / C# / C++'),level:90},
+    {name:c('skill.Niagara / PCG.name','Niagara / PCG'),level:88},
+    {name:c('skill.场景构建 & 材质.name','场景构建 & 材质'),level:93},
+    {name:c('skill.地形 & 植被系统.name','地形 & 植被系统'),level:90},
+    {name:c('skill.Ae / Pr / Maya.name','Ae / Pr / Maya'),level:72},
+  ];
+
+  const scrollTo = (id) => { document.getElementById(id)?.scrollIntoView({behavior:'smooth'}); setMobileNavOpen(false); };
+
+  React.useEffect(() => {
+    const handler = () => {
+      const sections = ['about','projects','contact'].map(id => ({id,top:document.getElementById(id)?.getBoundingClientRect().top||Infinity}));
+      setActiveSection(sections.reduce((a,b)=>Math.abs(b.top)<Math.abs(a.top)?b:a).id);
+    };
+    window.addEventListener('scroll', handler, {passive:true});
+    return () => window.removeEventListener('scroll', handler);
+  }, []);
+
+  return (
+    <div className="relative min-h-screen" style={{background:DARK_BG}}>
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[2px] opacity-20 scan-line" style={{background:'linear-gradient(90deg,transparent,'+CYAN+',transparent)'}}/>
+      <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.03]" style={{backgroundImage:'linear-gradient('+CYAN+'33 1px,transparent 1px),linear-gradient(90deg,'+CYAN+'33 1px,transparent 1px)',backgroundSize:'60px 60px'}}/>
+
+      <header className="fixed left-0 right-0 top-0 z-40 backdrop-blur-md" style={{background:DARK_BG+'cc',borderBottom:'1px solid '+PANEL_BORDER}}>
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
+          <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} className="flex items-center gap-2 font-mono text-sm tracking-widest" style={{color:CYAN}}>
+            <IconTerminal/> PORTFOLIO
+          </button>
+          <nav className="hidden sm:flex items-center gap-1">
+            {[{id:'about',label:'关于我',Icon:IconUser},{id:'projects',label:'项目',Icon:IconFolder},{id:'contact',label:'联系',Icon:IconMail}].map(item=>(
+              <button key={item.id} onClick={()=>scrollTo(item.id)}
+                className="relative flex items-center gap-1.5 px-3 py-1.5 font-mono text-xs tracking-wider"
+                style={{color:activeSection===item.id?CYAN:'#5a6a7a'}}>
+                <item.Icon/> {item.label}
+                {activeSection===item.id && <span className="absolute bottom-0 left-1/2 h-px w-4 -translate-x-1/2" style={{background:CYAN}}/>}
+              </button>
+            ))}
+          </nav>
+          <button className="sm:hidden p-1.5" style={{color:CYAN}} onClick={()=>setMobileNavOpen(!mobileNavOpen)}>
+            <span style={{transform:mobileNavOpen?'rotate(180deg)':'',transition:'transform 0.2s',display:'inline-block'}}><IconChevronDown/></span>
+          </button>
+        </div>
+        {mobileNavOpen && (
+          <div className="sm:hidden border-t" style={{background:PANEL_BG,borderColor:PANEL_BORDER}}>
+            {[{id:'about',label:'关于我',Icon:IconUser},{id:'projects',label:'项目',Icon:IconFolder},{id:'contact',label:'联系',Icon:IconMail}].map(item=>(
+              <button key={item.id} onClick={()=>scrollTo(item.id)} className="flex w-full items-center gap-2 px-6 py-3 text-sm" style={{color:CYAN}}>
+                <item.Icon/> {item.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </header>
+
+      <main className="relative z-10 mx-auto max-w-5xl px-6 pt-14">
+        <div className="flex min-h-[60vh] flex-col justify-center py-20">
+          <div className="relative">
+            <div className="absolute -left-4 top-0 bottom-0 w-[2px]" style={{background:'linear-gradient(180deg,'+CYAN+',transparent)'}}/>
+            <p className="mb-3 font-mono text-xs tracking-[0.3em]" style={{color:'#5a6a7a'}}>{c('hero.loading','> OPERATOR_PROFILE // LOADING...')}</p>
+            <h1 className="mb-2 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+              <span className="text-gray-100">{c('hero.name','孙 · 瑜谦')}</span>
+            </h1>
+            <h2 className="mb-6 text-lg font-light tracking-wider sm:text-xl" style={{color:CYAN}}>
+              <span className="font-light">{c('hero.title','游戏设计师 · 场景美术')}</span>
+            </h2>
+            <p className="max-w-xl text-sm leading-relaxed text-gray-400">{c('hero.description','熟练掌握 Unity 与 UE5 开发工具，主攻 UE5 地形编辑模块，具备扎实的场景构建与材质编写能力。精通 C / C# / C++，涵盖休闲、赛博朋克、中世纪、古风等多元化场景风格。')}</p>
+            <div className="mt-8 flex items-center gap-4">
+              <div className="inline-flex items-center gap-2 px-4 py-2 font-mono text-xs tracking-wider cursor-pointer" style={{border:'1px solid '+CYAN,color:CYAN,background:CYAN+'0d'}} onClick={()=>scrollTo('projects')}>
+                <IconExternalLink/> {c('hero.cta.projects','查看项目')}
+              </div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 font-mono text-xs tracking-wider cursor-pointer" style={{border:'1px solid '+PANEL_BORDER,color:'#8899aa'}} onClick={()=>scrollTo('contact')}>
+                <IconMail/> {c('hero.cta.contact','联系我')}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Section id="about" className="pb-20">
+          <SectionTitle index="01">{c('section.about','关于我')}</SectionTitle>
+          <div className="grid gap-8 sm:grid-cols-2">
+            <div className="relative p-6" style={{background:PANEL_BG,border:'1px solid '+PANEL_BORDER}}>
+              <div className="flex items-center gap-4 mb-6">
+                <div className="h-16 w-16 rounded-sm flex items-center justify-center" style={{border:'1px solid '+CYAN+'44',background:DARK_BG}}>
+                  <span className="text-2xl font-bold" style={{color:CYAN}}>孙</span>
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-gray-100">{c('about.name','孙瑜谦')}</h3>
+                  <p className="font-mono text-xs" style={{color:CYAN}}>{c('about.role','Game Designer / Scene Artist')}</p>
+                </div>
+              </div>
+              <div className="space-y-3 text-sm text-gray-400">
+                <div className="flex items-center gap-2"><IconMapPin/> {c('about.location','籍贯 · 重庆')}<span style={{color:PANEL_BORDER}}>|</span>{c('about.targetCity','求职 · 上海')}</div>
+                <div className="flex items-center gap-2"><IconGraduation/> {c('about.education','珠海科技学院 · 电子信息科学与技术 · 本科')}</div>
+                <div className="flex items-center gap-2"><IconCalendar/> {c('about.graduation','2022 - 2026 届 · 22 岁')}</div>
+              </div>
+              <div className="mt-6 grid grid-cols-3 gap-3 pt-4" style={{borderTop:'1px solid '+PANEL_BORDER}}>
+                {[{l:'引擎',v:c('stat.engine.value','UE5/Unity')},{l:'语言',v:c('stat.language.value','C/C#/C++')},{l:'场景风格',v:c('stat.style.value','4+')}].map(s=>(
+                  <div key={s.l} className="text-center">
+                    <div className="text-base font-bold" style={{color:CYAN}}>{s.v}</div>
+                    <div className="font-mono text-[10px] text-gray-500">{s.l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="p-6" style={{background:PANEL_BG,border:'1px solid '+PANEL_BORDER}}>
+              <div className="mb-4 flex items-center gap-2"><div className="h-1.5 w-1.5" style={{background:CYAN}}/><h3 className="font-mono text-xs tracking-widest text-gray-400">TECH_STACK</h3></div>
+              <div className="space-y-4">
+                {skills.map((s,i)=>{const{ref,visible}=useInView();return <div key={i} ref={ref}><SkillBar skill={s} visible={visible}/></div>;})}
+              </div>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {['Niagara','PCG','Houdini','EmberGen','Ae','Pr','Maya'].map((t,i)=>(
+                  <span key={i} className="px-2 py-0.5 font-mono text-[10px] tracking-wider" style={{border:'1px solid '+PANEL_BORDER,color:'#5a6a7a'}}>{c('tools.'+i,t)}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="mt-6 p-6" style={{background:PANEL_BG,border:'1px solid '+PANEL_BORDER}}>
+            <div className="mb-4 flex items-center gap-2"><span style={{color:GOLD}}><IconFlame/></span><h3 className="font-mono text-xs tracking-widest" style={{color:GOLD}}>PERSONAL_ADVANTAGE</h3></div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[c('advantage.0','熟练掌握 Unity 与 UE5，主攻 UE5 地形编辑模块，具备扎实的场景构建与材质编写能力'),c('advantage.1','熟练掌握 Niagara 粒子系统与 PCG 模块，具备独立搭建动态特效与程序化场景生成能力'),c('advantage.2','熟悉 Ae、Pr、Maya 等辅助软件，具备基础视频剪辑与 3D 建模能力'),c('advantage.3','精通 C 语言及其衍生语言 C# 与 C++，具备扎实编程基础')].map((text,i)=>(
+                <div key={i} className="flex gap-3">
+                  <span className="mt-0.5 flex-shrink-0 font-mono text-xs font-bold" style={{color:CYAN}}>{String(i+1).padStart(2,'0')}</span>
+                  <p className="text-sm leading-relaxed text-gray-400">{text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Section>
+
+        <Section id="projects" className="pb-20">
+          <SectionTitle index="02">{c('section.projects','项目作品')}</SectionTitle>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {visibleProjects.map((p,i)=>(
+              <ProjectCard key={p.id} project={p} index={i} previewSrc={data?.previewMap?.[p.id]} coverMode={c('project.'+p.id+'.coverMode','gradient')} navigate={navigate}/>
+            ))}
+          </div>
+          <div className="mt-8 flex items-center justify-center">
+            <span className="font-mono text-xs tracking-wider text-gray-600">{c('projects.footer','// 更多作品持续更新中')}</span>
+          </div>
+        </Section>
+
+        <Section id="contact" className="pb-20">
+          <SectionTitle index="03">{c('section.contact','联系方式')}</SectionTitle>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <a href={'mailto:'+c('contact.email','1109171617@qq.com')} target="_blank" rel="noopener noreferrer"
+              className="group relative overflow-hidden p-5 transition-all duration-300" style={{background:PANEL_BG,border:'1px solid '+PANEL_BORDER}}>
+              <div className="absolute bottom-0 left-0 h-[2px] w-0 transition-all duration-500 group-hover:w-full" style={{background:CYAN}}/>
+              <span style={{color:'#5a6a7a'}}><IconMail/></span>
+              <div className="mb-1 mt-3 font-mono text-[10px] tracking-widest text-gray-600">EMAIL</div>
+              <div className="text-sm text-gray-300">{c('contact.email','1109171617@qq.com')}</div>
+            </a>
+            <a href={'tel:'+c('contact.phone','182-2333-5807')} target="_blank" rel="noopener noreferrer"
+              className="group relative overflow-hidden p-5 transition-all duration-300" style={{background:PANEL_BG,border:'1px solid '+PANEL_BORDER}}>
+              <div className="absolute bottom-0 left-0 h-[2px] w-0 transition-all duration-500 group-hover:w-full" style={{background:CYAN}}/>
+              <span style={{color:'#5a6a7a'}}><IconPhone/></span>
+              <div className="mb-1 mt-3 font-mono text-[10px] tracking-widest text-gray-600">PHONE</div>
+              <div className="text-sm text-gray-300">{c('contact.phone','182-2333-5807')}</div>
+            </a>
+          </div>
+          <div className="mt-6 p-6" style={{background:PANEL_BG,border:'1px solid '+PANEL_BORDER}}>
+            <div className="flex items-center gap-2 mb-4"><div className="h-1.5 w-1.5" style={{background:GOLD}}/><h3 className="font-mono text-xs tracking-widest text-gray-400">STATUS_MESSAGE</h3></div>
+            <p className="text-sm leading-relaxed text-gray-400">{c('contact.message','感谢你浏览我的作品集！我是一名热爱游戏设计的应届毕业生，专注于场景美术与技术美术方向。如果你对我的项目感兴趣或有合作机会，欢迎通过以上方式联系我，期待与你的交流！')}</p>
+            <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 font-mono text-xs" style={{background:CYAN+'0d',border:'1px solid '+CYAN+'33',color:CYAN}}>
+              <span className="inline-block h-1.5 w-1.5 rounded-full animate-pulse" style={{background:CYAN}}/>
+              <span className="font-mono text-xs" style={{color:CYAN}}>{c('contact.badge','OPEN TO WORK · SHANGHAI')}</span>
+            </div>
+          </div>
+        </Section>
+      </main>
+      <footer className="relative z-10 border-t py-6 text-center" style={{borderColor:PANEL_BORDER}}>
+        <p className="font-mono text-[10px] tracking-[0.2em] text-gray-600">{'// DESIGNED WITH ARKNIGHTS AESTHIC //'}</p>
+        <p className="mt-1 font-mono text-[10px] tracking-wider text-gray-700">{c('footer.copyright','© 2026 SUN YUQIAN. ALL RIGHTS RESERVED.')}</p>
+      </footer>
+    </div>
+  );
+}
+
+/* ═══ Project Detail Page ═══ */
+function ProjectDetailPage({ data, navigate, projectId }) {
+  const content = data?.content || {};
+  const c = (key, def) => content[key] || def;
+  const allProjects = [...DEFAULT_PROJECTS, ...(data?.customProjects || [])];
+  const project = allProjects.find(p => p.id === projectId);
+  const [editData, setEditData] = React.useState(null);
+  const [lightboxSrc, setLightboxSrc] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!project) return;
+    const mediaKey = 'project-edit-' + project.id;
+    const rawMedia = data?.mediaData?.[mediaKey];
+    if (rawMedia) {
+      try {
+        const parsed = typeof rawMedia === 'string' ? JSON.parse(rawMedia) : rawMedia;
+        setEditData(parsed);
+      } catch (e) {
+        console.error('[portfolio] Failed to parse edit data for', project.id, e);
+        setEditData(null);
+      }
+    } else {
+      setEditData(null);
+    }
+  }, [project, data]);
+
+  if (!project) return (
+    <div className="flex min-h-screen flex-col items-center justify-center" style={{background:DARK_BG}}>
+      <p className="mb-2 font-mono text-sm tracking-widest" style={{color:CYAN}}>{'// ERROR_404'}</p>
+      <p className="mb-6 text-sm text-gray-500">未找到该项目的数据</p>
+      <button onClick={()=>navigate('/')} className="flex items-center gap-2 px-4 py-2 font-mono text-xs tracking-wider" style={{border:'1px solid '+CYAN,color:CYAN,background:CYAN+'0d'}}><IconArrowLeft/> 返回首页</button>
+    </div>
+  );
+
+  const items = editData?.items || [];
+  const cover = editData?.cover;
+  const containerHeight = items.length === 0 ? 300 : Math.max(400, Math.max(...items.map(it=>it.y+it.height+5)));
+
+  return (
+    <div className="relative min-h-screen" style={{background:DARK_BG}}>
+      {lightboxSrc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={()=>setLightboxSrc(null)}>
+          <div className="relative max-h-[90vh] max-w-[90vw]" onClick={e=>e.stopPropagation()}>
+            <button onClick={()=>setLightboxSrc(null)} className="absolute -right-3 -top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full" style={{background:DARK_BG,border:'1px solid '+PANEL_BORDER}}><span style={{color:CYAN}}><IconX/></span></button>
+            {lightboxSrc.type==='video'
+              ? <video src={lightboxSrc.src} controls autoPlay className="max-h-[85vh] rounded" style={{border:'1px solid '+PANEL_BORDER}}/>
+              : <img src={lightboxSrc.src} alt="" className="max-h-[85vh] rounded object-contain" style={{border:'1px solid '+PANEL_BORDER}}/>}
+          </div>
+        </div>
+      )}
+      <header className="sticky top-0 z-40 backdrop-blur-md" style={{background:DARK_BG+'cc',borderBottom:'1px solid '+PANEL_BORDER}}>
+        <div className="mx-auto flex h-12 max-w-5xl items-center px-6">
+          <button onClick={()=>navigate('/')} className="flex items-center gap-2 font-mono text-xs tracking-wider hover:opacity-80" style={{color:CYAN}}><IconArrowLeft/> 返回</button>
+          <div className="mx-4 h-4 w-px" style={{background:PANEL_BORDER}}/>
+          <span className="font-mono text-[10px] tracking-widest text-gray-600">PROJECT_DETAIL</span>
+        </div>
+      </header>
+      <main className="mx-auto max-w-5xl px-6 py-10">
+        <div className="mb-8">
+          {cover?.src ? (
+            <div className="relative mb-8 aspect-[21/9] overflow-hidden" style={{border:'1px solid '+PANEL_BORDER}}>
+              {cover.type==='video'
+                ? <video src={cover.src} className="h-full w-full object-cover" controls/>
+                : <img src={cover.src} alt={project.title} className="h-full w-full object-cover"/>}
+            </div>
+          ) : (
+            <div className="relative mb-8 flex aspect-[21/9] items-center justify-center" style={{background:PANEL_BG,border:'1px solid '+PANEL_BORDER}}>
+              <span className="font-mono text-lg font-bold" style={{color:CYAN}}>{project.title.charAt(0)}</span>
+            </div>
+          )}
+          <div className="mb-2 flex items-center gap-3">
+            <span className="inline-block h-2 w-2" style={{background:CYAN}}/>
+            <h1 className="text-2xl font-bold text-gray-100 sm:text-3xl">{c('project.'+project.id+'.title',project.title)}</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <span style={{color:CYAN}}><IconCalendar/></span>
+            <span className="font-mono text-xs" style={{color:CYAN}}>{c('project.'+project.id+'.year',project.year)}</span>
+            <div className="h-3 w-px" style={{background:PANEL_BORDER}}/>
+            {project.tags.map((tag,ti)=>(
+              <span key={ti} className="px-2 py-0.5 font-mono text-[10px] tracking-wider" style={{border:'1px solid '+PANEL_BORDER,color:'#5a6a7a'}}>{c('project.'+project.id+'.tag.'+ti,tag)}</span>
+            ))}
+          </div>
+        </div>
+        <div className="mb-10 p-6" style={{background:PANEL_BG,border:'1px solid '+PANEL_BORDER}}>
+          <div className="mb-3 flex items-center gap-2"><div className="h-1.5 w-1.5" style={{background:GOLD}}/><h2 className="font-mono text-xs tracking-widest text-gray-400">PROJECT_DESCRIPTION</h2></div>
+          <p className="text-sm leading-relaxed text-gray-300">{c('project.'+project.id+'.detail',project.detail)}</p>
+        </div>
+        <div>
+          <div className="mb-6 flex items-center gap-4">
+            <span className="font-mono text-sm tracking-widest" style={{color:CYAN}}>{'// MEDIA'}</span>
+            <div className="h-px flex-1" style={{background:'linear-gradient(90deg,'+CYAN_DIM+',transparent)'}}/>
+            <h2 className="text-lg font-bold text-gray-100">{c('project.'+project.id+'.mediaTitle','项目展示')}</h2>
+            <div className="h-px w-8" style={{background:CYAN}}/>
+          </div>
+          {items.length > 0 ? (
+            <div style={{height:containerHeight+'px',position:'relative'}}>
+              {items.map(item => {
+                if (item.type==='text') return (
+                  <div key={item.id} className="absolute" style={{left:item.x+'%',top:item.y+'%',width:item.width+'%',height:item.height+'%',opacity:item.opacity/100}}>
+                    <div className="h-full w-full rounded-sm overflow-hidden" style={{padding:'4px 8px',fontSize:(item.fontSize||16)+'px',fontWeight:item.fontWeight||'normal',color:item.color||'#e0e0e0',backgroundColor:item.backgroundColor||'transparent',fontFamily:item.fontFamily||'system-ui,sans-serif',textDecoration:item.underline?'underline':'none',whiteSpace:'pre-wrap',wordBreak:'break-word',lineHeight:1.4}}>
+                      {item.textContent||''}
+                    </div>
+                  </div>
+                );
+                if (!item.src) return (
+                  <div key={item.id} className="absolute flex h-full w-full items-center justify-center rounded-sm" style={{left:item.x+'%',top:item.y+'%',width:item.width+'%',height:item.height+'%',opacity:item.opacity/100,background:PANEL_BG,border:'1px solid '+PANEL_BORDER}}>
+                    <span className="font-mono text-[9px] text-gray-600">MEDIA</span>
+                  </div>
+                );
+                return (
+                  <div key={item.id} className="absolute group/media cursor-pointer" style={{left:item.x+'%',top:item.y+'%',width:item.width+'%',height:item.height+'%',opacity:item.opacity/100,transform:(item.rotation?'rotate('+item.rotation+'deg)':'')+(item.flipX?'scaleX(-1)':'')+(item.flipY?'scaleY(-1)':'')}}
+                    onClick={()=>{if(item.type!=='text')setLightboxSrc({src:item.src,type:item.type});}}>
+                    {item.type==='video'
+                      ? <video src={item.src} className="h-full w-full rounded-sm object-cover" muted style={{border:'1px solid '+PANEL_BORDER}}/>
+                      : <img src={item.src} alt={item.caption||''} className="h-full w-full rounded-sm object-cover" style={{border:'1px solid '+PANEL_BORDER}}/>}
+                    {item.type!=='video' && (
+                      <div className="absolute inset-0 flex items-center justify-center rounded-sm opacity-0 transition-opacity group-hover/media:opacity-100" style={{background:DARK_BG+'66'}}>
+                        <span style={{color:CYAN}}><IconExternalLink/></span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex h-[200px] items-center justify-center rounded-sm" style={{background:PANEL_BG,border:'1px solid '+PANEL_BORDER}}>
+              <span className="font-mono text-xs tracking-wider text-gray-600">{'// 暂无媒体资源'}</span>
+            </div>
+          )}
+        </div>
+      </main>
+      <footer className="mt-10 border-t py-6 text-center" style={{borderColor:PANEL_BORDER}}>
+        <button onClick={()=>navigate('/')} className="flex items-center gap-2 mx-auto font-mono text-xs tracking-wider hover:opacity-80" style={{color:CYAN}}><IconArrowLeft/> 返回作品集</button>
+      </footer>
+    </div>
+  );
+}
+
+/* ═══ Loading Screen ═══ */
+function LoadingScreen() {
+  return (
+    <div className="flex min-h-screen items-center justify-center" style={{background:DARK_BG}}>
+      <div className="text-center">
+        <div className="mb-4 h-8 w-8 mx-auto rounded-full border-2 border-t-transparent animate-spin" style={{borderColor:CYAN,borderTopColor:'transparent'}}/>
+        <p className="font-mono text-xs tracking-widest" style={{color:CYAN}}>{'// LOADING PORTFOLIO...'}</p>
+      </div>
+    </div>
+  );
+}
+
+/* ═══ App ═══ */
+function App() {
+  const { route, navigate } = useHashRouter();
+  const [data, setData] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    loadPortfolioData().then((loaded) => {
+      const content = loaded.content;
+      const customProjects = loaded.customProjects;
+      const projectOrder = loaded.projectOrder;
+      const mediaData = loaded.mediaData;
+
+      // Build preview map
+      const previewMap = {};
+      for (const [pid, src] of Object.entries(loaded.previewData || {})) {
+        if (src) previewMap[pid] = src;
+      }
+      for (const [key, rawMedia] of Object.entries(mediaData || {})) {
+        if (!key.startsWith('project-edit-')) continue;
+        const pid = key.replace('project-edit-', '');
+        if (previewMap[pid]) continue;
+        try {
+          const editObj = typeof rawMedia === 'string' ? JSON.parse(rawMedia) : rawMedia;
+          if (editObj?.cover?.src) {
+            previewMap[pid] = editObj.cover.src;
+          } else if (editObj?.items?.length) {
+            const firstImage = editObj.items.find(it => it.type === 'image' && it.src);
+            if (firstImage) previewMap[pid] = firstImage.src;
+          }
+        } catch {}
+      }
+
+      setData({ content, customProjects, projectOrder, mediaData, previewMap });
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
+  if (loading) return <LoadingScreen/>;
+
+  const projectIdMatch = route.match(/^[/]project[/](.+)$/);
+  if (projectIdMatch) {
+    return <ProjectDetailPage data={data} navigate={navigate} projectId={projectIdMatch[1]}/>;
+  }
+  return <HomePage data={data} navigate={navigate}/>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
